@@ -1,5 +1,8 @@
 # encoding: utf-8
 #
+# Cookbook Name:: deployinator
+# Recipe:: install
+#
 # Copyright 2013, ModCloth, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -22,12 +25,33 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-name             'deployinator'
-maintainer       'ModCloth, Inc.'
-maintainer_email 'github+deployinator-cookbook@modcloth.com'
-license          'MIT'
-description      'Deploys a Deployinator.  So meta!'
-long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.0'
+group node['deployinator']['group'] do
+  gid node['deployinator']['gid']
+end
 
-supports 'ubuntu', '>= 10.04'
+user node['deployinator']['user'] do
+  gid node['deployinator']['group']
+  supports manage_home: true
+  home node['deployinator']['home']
+  shell node['deployinator']['shell']
+end
+
+template "#{node['deployinator']['home']}/.bashrc" do
+  source 'dotbashrc.sh.erb'
+  owner node['deployinator']['user']
+  group node['deployinator']['group']
+  mode 0640
+end
+
+template "#{node['deployinator']['home']}/.bash_profile" do
+  source 'dotbash_profile.sh.erb'
+  owner node['deployinator']['user']
+  group node['deployinator']['group']
+  mode 0640
+end
+
+directory node['deployinator']['instance_prefix'] do
+  owner node['deployinator']['user']
+  group node['deployinator']['group']
+  mode 0750
+end

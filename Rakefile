@@ -2,7 +2,7 @@
 
 task default: :sane
 
-desc 'Assert the sanity'
+desc 'Assert sanity!'
 task sane: [:rubocop, :foodcritic]
 
 desc 'Run rubocop'
@@ -12,5 +12,5 @@ end
 
 desc 'Run foodcritic'
 task :foodcritic do
-  sh('bundle exec foodcritic --epic-fail any .') { |r, _| r || abort }
+  sh('foodcritic --epic-fail any .') { |r, _| r || abort }
 end

@@ -1,4 +1,4 @@
-# encoding: utf-8
+# Dropped off by Chef for <%= node.name %>
 #
 # Copyright 2013, ModCloth, Inc.
 #
@@ -21,13 +21,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+description "deployinator server instance"
 
-name             'deployinator'
-maintainer       'ModCloth, Inc.'
-maintainer_email 'github+deployinator-cookbook@modcloth.com'
-license          'MIT'
-description      'Deploys a Deployinator.  So meta!'
-long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.0'
+setuid <%= node['deployinator']['user'] %>
+umask 022
+chdir <%= @cwd %>
 
-supports 'ubuntu', '>= 10.04'
+respawn
+respawn limit 5 10
+
+env PATH=<%= node['deployinator']['home'] %>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+
+exec unicorn -p <%= @port %>
