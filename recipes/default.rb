@@ -27,13 +27,24 @@
 
 include_recipe 'deployinator::install'
 
-is_recent_ubuntu = platform?('ubuntu') &&
-  node['platform_version'].to_f >= 10.04
+service_provider = value_for_platform(
+  'smartos' => {
+    'default' => Chef::Provider::Service::Solaris
+  },
+  'ubuntu' => {
+    'default' => Chef::Provider::Service::Upstart
+  }
+)
+
+service "service[#{node['deployinator']['service_name']}]" do
+  provider service_provider
+  action :nothing
+end
 
 smf node['deployinator']['service_name'] do
   user node['deployinator']['user']
   group node['deployinator']['group']
-  start_command "unicorn -p #{ensure_http_port(node['deployinator']['http_port'])}"
+  start_command "unicorn -p #{node['deployinator']['http_port']}"
   stop_command ':kill'
   restart_command ':kill HUP'
   working_directory "#{node['deployinator']['home']}/current"
@@ -46,17 +57,12 @@ template '/etc/init/deployinator.conf' do
   source node['deployinator']['upstart_template_file']
   cookbook node['deployinator']['upstart_template_cookbook']
   variables(
-    port: ensure_http_port(node['deployinator']['http_port']),
+    port: node['deployinator']['http_port'],
     cwd: "#{node['deployinator']['home']}/current"
   )
   notifies :enable, "service[#{node['deployinator']['service_name']}]"
   notifies :start, "service[#{node['deployinator']['service_name']}]"
-  only_if { is_recent_ubuntu }
-end
-
-service "service[#{node['deployinator']['service_name']}]" do
-  provider is_recent_ubuntu ? Chef::Provider::Service::Upstart : nil
-  action :nothing
+  only_if { platform?('ubuntu') }
 end
 
 deploy_revision 'deployinator' do

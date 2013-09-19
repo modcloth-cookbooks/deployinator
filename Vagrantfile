@@ -10,7 +10,7 @@ if [ ! -d /tmp/example-app/.git ] ; then
   git clone https://github.com/etsy/deployinator.git example-app
 fi
 
-chown -R deployinator:deployinator /tmp/example-app
+chown -R deployinator:deployinator /tmp/example-app || true
 EOF
 
 Vagrant.configure('2') do |config|

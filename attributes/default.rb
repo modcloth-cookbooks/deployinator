@@ -9,6 +9,6 @@ default['deployinator']['repository'] = nil
 default['deployinator']['revision'] = nil
 default['deployinator']['http_port'] = 13060
 default['deployinator']['deploy_action'] = 'deploy'
-default['deployinator']['service_name'] = nil
+default['deployinator']['service_name'] = 'deployinator'
 default['deployinator']['upstart_template_file'] = 'deployinator.conf.erb'
 default['deployinator']['upstart_template_cookbook'] = 'deployinator'
