@@ -7,7 +7,7 @@ task sane: [:rubocop, :foodcritic]
 
 desc 'Run rubocop'
 task :rubocop do
-  sh('rubocop --config .rubocop.yml --format simple') { |r, _| r || abort }
+  sh('rubocop --format simple') { |r, _| r || abort }
 end
 
 desc 'Run foodcritic'

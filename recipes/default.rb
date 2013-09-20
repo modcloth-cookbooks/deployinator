@@ -45,7 +45,7 @@ end
 smf node['deployinator']['service_name'] do
   user node['deployinator']['user']
   group node['deployinator']['group']
-  start_command "bundle exec rackup " <<
+  start_command 'bundle exec rackup ' <<
                   "-p #{node['deployinator']['http_port']} " <<
                   "-E #{node['deployinator']['rack_env']} " <<
                   node['deployinator']['rackup_options']
