@@ -3,7 +3,7 @@
 # Deployinator is adds some convenience bits to recipes and resources
 module Deployinator
   def deployinator_user_env
-    @deployinator_user_env ||= {
+    @deployinator_user_env ||= node['deployinator']['environment'].merge({
       'HOME' => node['deployinator']['home'],
       'PATH' => %W(
         #{node['deployinator']['home']}/.rbenv/bin
@@ -14,7 +14,7 @@ module Deployinator
         /usr/bin /usr/sbin
         /bin /sbin
       ).join(':')
-    }
+    })
   end
 end
 

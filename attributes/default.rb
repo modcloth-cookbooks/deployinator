@@ -15,6 +15,7 @@ default['deployinator']['service_name'] = 'deployinator'
 default['deployinator']['upstart_template_file'] = 'deployinator.conf.erb'
 default['deployinator']['upstart_template_cookbook'] = 'deployinator'
 default['deployinator']['packages'] = %w(build-essential libxml2-dev libxslt-dev)
+default['deployinator']['environment'] = {}
 
 default['deployinator']['puma']['enabled'] = true
 default['deployinator']['puma']['options'] = ''

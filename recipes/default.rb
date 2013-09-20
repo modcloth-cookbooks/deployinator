@@ -72,6 +72,20 @@ template '/etc/init/deployinator.conf' do
   only_if { platform?('ubuntu') }
 end
 
+%w(
+  shared
+  shared/log
+  shared/vendor
+  shared/vendor/bundle
+  shared/pids
+).each do |shared_dir|
+  directory "#{node['deployinator']['home']}/#{shared_dir}" do
+    user node['deployinator']['user']
+    group node['deployinator']['group']
+    mode 0750
+  end
+end
+
 deploy_revision node['deployinator']['home'] do
   user node['deployinator']['user']
   group node['deployinator']['group']
@@ -80,9 +94,8 @@ deploy_revision node['deployinator']['home'] do
   migrate false
 
   symlink_before_migrate.clear
-  create_dirs_before_symlink.clear
-
   purge_before_symlink << 'vendor/bundle'
+  create_dirs_before_symlink << 'vendor'
   symlinks['vendor/bundle'] = 'vendor/bundle'
 
   before_migrate do

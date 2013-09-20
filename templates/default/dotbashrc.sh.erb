@@ -1,1 +1,3 @@
-export PATH="<%= @env['PATH'] %>"
+<% @env.each do |key, value| %>
+export <%= key %>="<%= value.gsub(/"/, '\"') %>"
+<% end %>

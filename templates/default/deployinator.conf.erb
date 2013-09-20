@@ -30,7 +30,9 @@ chdir <%= @cwd %>
 respawn
 respawn limit 5 10
 
-env PATH=<%= @env['PATH'] %>
+<% @env.each do |key, value| %>
+env <%= key %>=<%= value %>
+<% end %>
 
 <% if @puma['enabled'] %>
 exec puma -p <%= @http_port %> -e <%= @rack_env %> <%= @puma['options'] %>

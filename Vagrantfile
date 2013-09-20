@@ -24,7 +24,11 @@ Vagrant.configure('2') do |config|
     chef.json = {
       'deployinator' => {
         'repository' => 'https://github.com/etsy/deployinator.git',
-        'revision' => 'master'
+        'revision' => 'master',
+        'environment' => {
+          'HTTP_X_USERNAME' => 'derp',
+          'HTTP_X_GROUPS' => 'derp'
+        }
       }
     }
     chef.run_list = [
