@@ -36,18 +36,23 @@ service_provider = value_for_platform(
   }
 )
 
-service "service[#{node['deployinator']['service_name']}]" do
+service node['deployinator']['service_name'] do
   provider service_provider
+  supports enable: true, start: true, restart: true, stop: true
   action :nothing
 end
 
 smf node['deployinator']['service_name'] do
   user node['deployinator']['user']
   group node['deployinator']['group']
-  start_command "unicorn -p #{node['deployinator']['http_port']}"
+  start_command "bundle exec rackup " <<
+                  "-p #{node['deployinator']['http_port']} " <<
+                  "-E #{node['deployinator']['rack_env']} " <<
+                  node['deployinator']['rackup_options']
   stop_command ':kill'
   restart_command ':kill HUP'
   working_directory "#{node['deployinator']['home']}/current"
+  environment deployinator_user_env
   notifies :enable, "service[#{node['deployinator']['service_name']}]"
   notifies :start, "service[#{node['deployinator']['service_name']}]"
   only_if { platform?('smartos') }
@@ -57,19 +62,43 @@ template '/etc/init/deployinator.conf' do
   source node['deployinator']['upstart_template_file']
   cookbook node['deployinator']['upstart_template_cookbook']
   variables(
-    port: node['deployinator']['http_port'],
-    cwd: "#{node['deployinator']['home']}/current"
+    node['deployinator'].to_hash.merge(
+      cwd: "#{node['deployinator']['home']}/current",
+      env: deployinator_user_env
+    )
   )
   notifies :enable, "service[#{node['deployinator']['service_name']}]"
   notifies :start, "service[#{node['deployinator']['service_name']}]"
   only_if { platform?('ubuntu') }
 end
 
-deploy_revision 'deployinator' do
+deploy_revision node['deployinator']['home'] do
   user node['deployinator']['user']
   group node['deployinator']['group']
-  repo node['deployinator']['repo']
+  repo node['deployinator']['repository']
   revision node['deployinator']['revision']
+  migrate false
+
+  symlink_before_migrate.clear
+  create_dirs_before_symlink.clear
+
+  purge_before_symlink << 'vendor/bundle'
+  symlinks['vendor/bundle'] = 'vendor/bundle'
+
+  before_migrate do
+    current_release = release_path
+
+    bash "bundle for deployinator #{node['deployinator']['revision']}" do
+      cwd current_release
+      code 'bundle install --deployment'
+      environment deployinator_user_env
+    end
+  end
+
+  notifies :restart, "service[#{node['deployinator']['service_name']}]"
+
   action node['deployinator']['deploy_action'].to_sym
-  only_if { node['deployinator']['repo'] && node['deployinator']['revision'] }
+  only_if do
+    node['deployinator']['repository'] && node['deployinator']['revision']
+  end
 end

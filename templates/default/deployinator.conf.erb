@@ -30,6 +30,10 @@ chdir <%= @cwd %>
 respawn
 respawn limit 5 10
 
-env PATH=<%= node['deployinator']['home'] %>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+env PATH=<%= @env['PATH'] %>
 
-exec unicorn -p <%= @port %>
+<% if @puma['enabled'] %>
+exec puma -p <%= @http_port %> -e <%= @rack_env %> <%= @puma['options'] %>
+<% else %>
+exec bundle exec rackup -p <%= @http_port %> -E <%= @rack_env %> <%= @rackup_options %>
+<% end %>
